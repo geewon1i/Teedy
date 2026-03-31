@@ -15,7 +15,6 @@
   <name>Docs Web</name>
 
   <dependencies>
-    <!-- Dependencies to Docs -->
     <dependency>
       <groupId>com.sismics.docs</groupId>
       <artifactId>docs-core</artifactId>
@@ -26,7 +25,6 @@
       <artifactId>docs-web-common</artifactId>
     </dependency>
     
-    <!-- Dependencies to Jersey -->
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet</artifactId>
@@ -47,7 +45,6 @@
       <artifactId>jersey-hk2</artifactId>
     </dependency>
       
-    <!-- Other external dependencies -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
@@ -81,10 +78,10 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
+      <version>5.0.0</version>
       <scope>provided</scope>
     </dependency>
     
-    <!-- Test dependencies -->
     <dependency>
       <groupId>com.sismics.docs</groupId>
       <artifactId>docs-web-common</artifactId>
@@ -146,7 +143,6 @@
   </build>
 
   <profiles>
-    <!-- Development profile (active by default) -->
     <profile>
       <id>dev</id>
       <activation>
@@ -176,20 +172,26 @@
         </resources>
 
         <plugins>
-          <plugin>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-maven-plugin</artifactId>
-            <configuration>
-              <systemProperties>
-                <application.mode>dev</application.mode>
-                <docs.home>../data/docs</docs.home>
-              </systemProperties>
-              <webApp>
-                <contextPath>/docs-web</contextPath>
-                <overrideDescriptor>${project.basedir}/src/dev/main/webapp/web-override.xml</overrideDescriptor>
-              </webApp>
-            </configuration>
-          </plugin>
+		  <plugin>
+			  <groupId>org.eclipse.jetty</groupId>
+			  <artifactId>jetty-maven-plugin</artifactId>
+			  <version>11.0.12</version>
+			  <configuration>
+				  <systemProperties>
+					  <systemProperty>
+						  <name>teedy.home</name>
+						  <value>/home/kim/teedy_data</value>
+					  </systemProperty>
+					  <systemProperty>
+						  <name>database.url</name>
+						  <value>jdbc:h2:file:/home/kim/teedy_data/db;DB_CLOSE_DELAY=-1</value>
+					  </systemProperty>
+				  </systemProperties>
+				  <httpConnector>
+					  <port>8080</port>
+				  </httpConnector>
+			  </configuration>
+		  </plugin>
           
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -203,10 +205,8 @@
       </build>
     </profile>
     
-    <!-- Production profile -->
     <profile>
       <id>prod</id>
-      
       <build>
         <resources>
           <resource>
@@ -226,8 +226,6 @@
         </resources>
         
         <plugins>
-        
-          <!-- Launch NPM & Grunt -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
@@ -236,14 +234,12 @@
                 <phase>generate-sources</phase>
                 <configuration>
                   <target name="building">
-                    <!-- npm install -->
                     <exec executable="cmd" dir="${project.basedir}/src/main/webapp" osfamily="windows" failonerror="true">
                       <arg line="/c npm install" />
                     </exec>
                     <exec executable="npm" dir="${project.basedir}/src/main/webapp" osfamily="unix" failonerror="true">
                       <arg line="install" />
                     </exec>
-                    <!-- grunt -->
                     <exec executable="cmd" dir="${project.basedir}/src/main/webapp" osfamily="windows" failonerror="true">
                       <arg line="/c grunt --apiurl=api" />
                     </exec>
@@ -259,7 +255,6 @@
             </executions>
           </plugin>
         
-          <!-- WAR generation -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-war-plugin</artifactId>
