@@ -9,6 +9,8 @@
   <version>1.12-SNAPSHOT</version>
 
   <name>Docs Parent</name>
+  <description>Teedy parent project</description>
+  <url>https://github.com/sismics/docs</url>
 
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
@@ -61,14 +63,26 @@
     <org.apache.maven.plugins.maven-war-plugin.version>3.3.2</org.apache.maven.plugins.maven-war-plugin.version>
     <org.apache.maven.plugins.maven-surefire-plugin.version>3.0.0</org.apache.maven.plugins.maven-surefire-plugin.version>
     <org.eclipse.jetty.jetty-maven-plugin.version>11.0.20</org.eclipse.jetty.jetty-maven-plugin.version>
+
+    <!-- Site plugins -->
+    <org.apache.maven.plugins.maven-site-plugin.version>3.12.1</org.apache.maven.plugins.maven-site-plugin.version>
+    <org.apache.maven.plugins.maven-project-info-reports-plugin.version>3.5.0</org.apache.maven.plugins.maven-project-info-reports-plugin.version>
+    <org.apache.maven.plugins.maven-pmd-plugin.version>3.28.0</org.apache.maven.plugins.maven-pmd-plugin.version>
   </properties>
 
   <scm>
     <connection>scm:git:https://github.com/sismics/docs.git</connection>
-    <developerConnection>scm:git:https://github.com/docs/docs.git</developerConnection>
-    <url>scm:git:https://github.com/sismics/docs.git</url>
+    <developerConnection>scm:git:https://github.com/sismics/docs.git</developerConnection>
+    <url>https://github.com/sismics/docs</url>
     <tag>HEAD</tag>
   </scm>
+
+  <distributionManagement>
+    <site>
+      <id>local-site</id>
+      <url>file://${project.build.directory}/staging</url>
+    </site>
+  </distributionManagement>
 
   <repositories>
     <repository>
@@ -116,8 +130,80 @@
         <artifactId>jetty-maven-plugin</artifactId>
         <version>${org.eclipse.jetty.jetty-maven-plugin.version}</version>
       </plugin>
+
+      <!-- Add site plugin explicitly -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${org.apache.maven.plugins.maven-site-plugin.version}</version>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${org.apache.maven.plugins.maven-pmd-plugin.version}</version>
+        <configuration>
+          <targetJdk>11</targetJdk>
+          <linkXref>false</linkXref>
+          <rulesets>
+            <ruleset>config/pmd/teedy-metrics-ruleset.xml</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.9</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>${org.apache.maven.plugins.maven-project-info-reports-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${org.apache.maven.plugins.maven-pmd-plugin.version}</version>
+        <configuration>
+          <targetJdk>11</targetJdk>
+          <linkXref>false</linkXref>
+          <rulesets>
+            <ruleset>config/pmd/teedy-metrics-ruleset.xml</ruleset>
+          </rulesets>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>pmd</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      
+    </plugins>
+  </reporting>
 
   <modules>
     <module>docs-core</module>
@@ -459,29 +545,24 @@
         <version>${org.apache.directory.server.apacheds-all.version}</version>
       </dependency>
 
-      <!-- ImageIO plugins -->
-      <!-- JPEG -->
       <dependency>
         <groupId>com.twelvemonkeys.imageio</groupId>
         <artifactId>imageio-jpeg</artifactId>
         <version>${com.twelvemonkeys.imageio.version}</version>
       </dependency>
 
-      <!-- TIFF -->
       <dependency>
         <groupId>com.twelvemonkeys.imageio</groupId>
         <artifactId>imageio-tiff</artifactId>
         <version>${com.twelvemonkeys.imageio.version}</version>
       </dependency>
 
-      <!-- JPEG 2000 -->
       <dependency>
         <groupId>com.github.jai-imageio</groupId>
         <artifactId>jai-imageio-jpeg2000</artifactId>
         <version>${com.github.jai-imageio.jai-imageio-jpeg2000.version}</version>
       </dependency>
 
-      <!-- JBIG2 -->
       <dependency>
         <groupId>com.levigo.jbig2</groupId>
         <artifactId>levigo-jbig2-imageio</artifactId>
