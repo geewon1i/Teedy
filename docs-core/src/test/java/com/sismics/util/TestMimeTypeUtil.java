@@ -6,6 +6,7 @@ import com.sismics.util.mime.MimeTypeUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -68,5 +69,21 @@ public class TestMimeTypeUtil extends BaseTest {
         // Detect MP4 files
         path = Paths.get(getResource(FILE_MP4).toURI());
         Assert.assertEquals(MimeType.VIDEO_MP4, MimeTypeUtil.guessMimeType(path, FILE_MP4));
+    }
+
+    @Test
+    public void testDefaultMimeTypeAndExtension() throws Exception {
+        Path tempDirectory = Files.createTempDirectory("mime-type-util");
+        Path tempFile = tempDirectory.resolve("sample");
+
+        try {
+            Files.createFile(tempFile);
+
+            Assert.assertEquals(MimeType.DEFAULT, MimeTypeUtil.guessMimeType(tempFile, null));
+            Assert.assertEquals("bin", MimeTypeUtil.getFileExtension("application/x-unknown"));
+        } finally {
+            Files.deleteIfExists(tempFile);
+            Files.deleteIfExists(tempDirectory);
+        }
     }
 }
