@@ -2,14 +2,9 @@ pipeline {
     agent any
 
     environment {
-        // Jenkins 中配置的 Docker Hub Credentials ID
-        DOCKER_HUB_CREDENTIALS_ID = '1'
-
-        // Docker Hub 仓库名
         DOCKER_IMAGE = 'kimjiwon777/teedy'
-
-        // 使用 Jenkins build number 作为镜像 tag
         DOCKER_TAG = "${env.BUILD_NUMBER}"
+        WSL_WORKSPACE = '/mnt/c/Users/94875/.jenkins/workspace/Teedy2'
     }
 
     stages {
@@ -29,35 +24,37 @@ pipeline {
 
         stage('Building image') {
             steps {
-                script {
-                    docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
-                }
+                bat """
+                wsl -d Ubuntu -- bash -lc "cd ${WSL_WORKSPACE} && docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                """
             }
         }
 
         stage('Upload image') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIALS_ID) {
-                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
-                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push('latest')
-                    }
+                withCredentials([usernamePassword(
+                    credentialsId: '1',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat """
+                    wsl -d Ubuntu -- bash -lc "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
+                    wsl -d Ubuntu -- bash -lc "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    wsl -d Ubuntu -- bash -lc "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    wsl -d Ubuntu -- bash -lc "docker push ${DOCKER_IMAGE}:latest"
+                    """
                 }
             }
         }
 
         stage('Run containers') {
             steps {
-                script {
-                    sh 'docker stop teedy-container-8081 || true'
-                    sh 'docker rm teedy-container-8081 || true'
-
-                    docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").run(
-                        '--name teedy-container-8081 -d -p 8081:8080'
-                    )
-
-                    sh 'docker ps --filter "name=teedy-container"'
-                }
+                bat """
+                wsl -d Ubuntu -- bash -lc "docker stop teedy-container-8081 || true"
+                wsl -d Ubuntu -- bash -lc "docker rm teedy-container-8081 || true"
+                wsl -d Ubuntu -- bash -lc "docker run --name teedy-container-8081 -d -p 8081:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                wsl -d Ubuntu -- bash -lc "docker ps --filter name=teedy-container"
+                """
             }
         }
     }
