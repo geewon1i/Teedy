@@ -33,7 +33,7 @@ pipeline {
         stage('Upload image') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: '1',
+                    credentialsId: 'dockerhub_credentials',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
